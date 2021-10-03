@@ -76,6 +76,7 @@ then
         PATH_UPOWERD="/usr/lib/upower"
         PATH_UPOWER="/usr/bin"
     elif [ ${OS_VER_MAJOR} -ge 11 ]
+    then
         PATH_UPOWERD="/usr/libexec"
         PATH_UPOWER="/usr/bin"
     else
