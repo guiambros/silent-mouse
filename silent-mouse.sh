@@ -71,9 +71,16 @@ then
     echo "-- Debian detected; installing required libraries"
     sudo apt install -y git gtk-doc-tools gobject-introspection libgudev-1.0-dev libusb-1.0-0-dev autoconf libtool autopoint
     set_legacy_upowerd
-    PATH_UPOWERD="/usr/lib/upower"
-    PATH_UPOWER="/usr/bin"
-
+    elif [ ${OS_VER_MAJOR} -le 10 ]
+        PATH_UPOWERD="/usr/lib/upower"
+        PATH_UPOWER="/usr/bin"
+    elif [ ${OS_VER_MAJOR} -ge 11 ]
+        PATH_UPOWERD="/usr/libexec"
+        PATH_UPOWER="/usr/bin"
+    else
+        echo "-- Unknown Debian system [${OS_VER} / ${OS_VER_MAJOR}]."
+        exit 1    
+    fi
 else
     echo "-- Unknown system; this script was only tested on ubuntu and manjaro."
     exit 1
