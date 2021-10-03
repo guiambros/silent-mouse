@@ -1,11 +1,20 @@
 #!/bin/bash
 set -e
 
-# See https://wrgms.com/disable-mouse-battery-low-spam-notification/
-# for instructions on how to use it
+# This script patches your upower / upowerd to ignore low battery notifications from 
+# a wireless mouse (and optionally keyboard) device.
 #
-# TL;DR: run with "--keyboard" if you want to patch upower to ignore both
-# mice and keyboard notifications (by default it ignores only mice)
+# By default it disables only mouse; if ydesired run with "--keyboard" if you
+# also disable keyboard notifications.
+#
+# See https://wrgms.com/disable-mouse-battery-low-spam-notification/
+# for details
+
+
+OS=`awk -F= '/^ID=/{print $2}' /etc/os-release`
+OS_VER=`awk -F= '/^VERSION_ID=/{print $2}' /etc/os-release | cut -d "\"" -f 2`
+OS_VER_MAJOR=`echo ${OS_VER} | awk -F. '{print $1}'`
+UPOWER_ORIG_VER=`upower --version`
 
 # Check distro and upower version in use, and install required libraries
 #
@@ -15,15 +24,15 @@ upower --version
 echo "---------------------------------------------------------------------------"
 echo
 
-UPOWER_ORIG_VER=`upower --version`
-OS=`awk -F= '/^ID=/{print $2}' /etc/os-release`
-OS_VER=`awk -F= '/^VERSION_ID=/{print $2}' /etc/os-release | cut -d "\"" -f 2`
-OS_VER_MAJOR=`echo ${OS_VER} | awk -F. '{print $1}'`
+set_legacy_upowerd() {
+    UPOWER_BRANCH="UPOWER_0_99_11"
+    PATCH_NAME="up-device-legacy.patch"
+}
 
-PATCH_LEGACY_URL="https://gist.githubusercontent.com/guiambros/f2bf07f1cc085f8f0b0a9e04c0a767b4/raw/73efac967c8fc9539802e7aa8eeba5492f8ae3b1/up-device-legacy.patch"
-PATCH_CURRENT_URL="https://gist.githubusercontent.com/guiambros/f2bf07f1cc085f8f0b0a9e04c0a767b4/raw/73efac967c8fc9539802e7aa8eeba5492f8ae3b1/up-device-current-0.99.12p.patch"
-PATCH_NAME="up-device.patch"
-PATCH_URL=${PATCH_CURRENT_URL}
+set_current_upowerd() {
+    UPOWER_BRANCH=""
+    PATCH_NAME="up-device-current-0.99.12p.patch"
+}
 
 if [ "$OS" == "manjaro" ]
 then
@@ -42,23 +51,28 @@ then
     then
         echo "--- Ubuntu version 20.10 (Groovy Gorilla) detected"
         PATH_UPOWERD="/usr/libexec"
-        UPOWER_BRANCH="UPOWER_0_99_11"
-        PATCH_URL=${PATCH_LEGACY_URL}
+        set_legacy_upowerd
 
     elif [ ${OS_VER_MAJOR} -ge 21 ]
     then
         echo "--- Ubuntu version 21 or above detected"
         PATH_UPOWERD="/usr/libexec"
-        UPOWER_BRANCH="UPOWER_0_99_11"
-        PATCH_URL=${PATCH_LEGACY_URL}
+        set_legacy_upowerd
 
     elif [ ${OS_VER_MAJOR} -le 20 ]
     then
         echo "--- Ubuntu version 20.04 or lower detected"
         PATH_UPOWERD="/usr/lib/upower"
-        UPOWER_BRANCH="UPOWER_0_99_11"
-        PATCH_URL=${PATCH_LEGACY_URL}
+        set_legacy_upowerd
     fi
+
+elif [ "$OS" == "debian" ]
+then
+    echo "-- Debian detected; installing required libraries"
+    sudo apt install -y git gtk-doc-tools gobject-introspection libgudev-1.0-dev libusb-1.0-0-dev autoconf libtool autopoint
+    PATH_UPOWERD="/usr/lib/upower"
+    PATH_UPOWER="/usr/bin"
+
 else
     echo "-- Unknown system; this script was only tested on ubuntu and manjaro."
     exit 1
@@ -69,7 +83,6 @@ echo
 
 # Download upowerd source and selects the proper branch
 #
-cd ~
 git clone https://gitlab.freedesktop.org/upower/upower
 
 if [ -z ${UPOWER_BRANCH} ]
@@ -87,13 +100,12 @@ fi
 
 # Download and patch upowerd
 #
-wget ${PATCH_URL} -O ${PATCH_NAME}
+cp ../../${PATCH_NAME} .
 if [ "$1" == "-keyboard" ] || [ "$1" == "--keyboard" ]; then
         SILENCE_KEYBOARD="+     if ((type == UP_DEVICE_KIND_MOUSE || type == UP_DEVICE_KIND_KEYBOARD) && state == UP_DEVICE_STATE_DISCHARGING) {"
         sed -i "/UP_DEVICE_KIND_MOUSE/c${SILENCE_KEYBOARD}" ${PATCH_NAME}
 fi
 patch -F 1 < ${PATCH_NAME}
-
 
 # Compile upowerd
 #
@@ -143,5 +155,6 @@ echo "--------------------------------------------------------------------------
 echo "upower version BEFORE the update:"
 echo "${UPOWER_ORIG_VER}"
 echo "-------------------------------------"
-echo "upower version AFTER the update:"
+echo "upower version AFTER the update (likely same version, or a minor number above):"
 upower --version
+echo "-------------------------------------"
