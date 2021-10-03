@@ -23,4 +23,4 @@ This script was tested with the following distributions and versions:
 | Manjaro      | manjaro 21                                      |
 
 
-⚠️  ...
+⚠️  Disclaimer: this is provided as is; you are responsible for checking the accuracy of the patch and ensure it won't ruin your system. Having said that, please open an issue if it doesn't work for you.
