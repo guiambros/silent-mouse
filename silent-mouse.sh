@@ -71,7 +71,7 @@ then
     echo "-- Debian detected; installing required libraries"
     sudo apt install -y git gtk-doc-tools gobject-introspection libgudev-1.0-dev libusb-1.0-0-dev autoconf libtool autopoint
     set_legacy_upowerd
-    elif [ ${OS_VER_MAJOR} -le 10 ]
+    if [ ${OS_VER_MAJOR} -le 10 ]
         PATH_UPOWERD="/usr/lib/upower"
         PATH_UPOWER="/usr/bin"
     elif [ ${OS_VER_MAJOR} -ge 11 ]
