@@ -1,6 +1,6 @@
 # Silent Mouse
 
-Are you annoyed by frequent "low battery" notifications from your Logitech Mouse on a Linux desktop using Gnome? Do you want to stop this madness?
+Are you annoyed by frequent "low battery" notifications from your wireless mouse or keyboard on a Linux desktop using Gnome? Do you want to stop this madness?
 
 This script will walk you through the steps to fix it. For more details and background, read this [blog post](https://wrgms.com/disable-mouse-battery-low-spam-notification/).
 
@@ -11,6 +11,15 @@ git clone https://github.com/guiambros/silent-mouse
 cd silent-mouse
 bash silent-mouse.sh
 ```
+
+By default this disables only wireless mouse notifications. If you want to disable wireless keyboard notifications, you can add `--keyboard` to the script, i.e., 
+
+```
+git clone https://github.com/guiambros/silent-mouse
+cd silent-mouse
+bash silent-mouse.sh --keyboard
+```
+
 
 ## Versions tested
 
