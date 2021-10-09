@@ -12,7 +12,7 @@ cd silent-mouse
 bash silent-mouse.sh
 ```
 
-By default this disables only wireless mouse notifications. If you want to disable wireless keyboard notifications, you can add `--keyboard` to the script, i.e., 
+By default this disables only wireless mouse notifications. If you want to disable wireless keyboard notifications, you can add `--keyboard` to the script:
 
 ```
 git clone https://github.com/guiambros/silent-mouse

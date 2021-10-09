@@ -1,0 +1,19 @@
+--- up-device.c 2021-10-08 22:09:50.845459907 -0400
++++ up-device-patched.c 2021-10-08 22:15:49.805190176 -0400
+@@ -67,6 +67,15 @@
+	if (device->priv->daemon == NULL)
+		return;
+
++	/* Disable warning notifications for wireless mice with rechargeable batteries */
++	int type = up_exported_device_get_type_ (skeleton);
++	int state = up_exported_device_get_state(skeleton);
++	if (type == UP_DEVICE_KIND_MOUSE && state == UP_DEVICE_STATE_DISCHARGING) {
++		warning_level = UP_DEVICE_LEVEL_NONE;
++		up_exported_device_set_warning_level (skeleton, warning_level);
++		return;
++	}
++
+	/* If the battery level is available, and is critical,
+	 * we need to fallback to calculations to get the warning
+	 * level, as that might be "action" at this point */
+
