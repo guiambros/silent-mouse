@@ -25,21 +25,22 @@ echo "--------------------------------------------------------------------------
 echo
 
 set_legacy_upowerd() {
-    UPOWER_BRANCH="UPOWER_0_99_11"
-    PATCH_NAME="up-device-legacy.patch"
+    UPOWER_BRANCH="UPOWER_0_99_12"
+    PATCH_NAME="up-device-0_99_12.patch"
 }
 
 set_current_upowerd() {
-    UPOWER_BRANCH=""
-    PATCH_NAME="up-device-current-0.99.12p.patch"
+    UPOWER_BRANCH="UPOWER_0_99_13"
+    PATCH_NAME="up-device-0_99_13.patch"
 }
 
 if [ "$OS" == "manjaro" ]
 then
     echo "-- Manjaro detected; installing required libraries"
-    sudo pacman -S base-devel gtk-doc gobject-introspection git
+    sudo pacman -Syu --noconfirm base-devel gtk-doc gobject-introspection git libtool meson autoconf automake make 
     PATH_UPOWERD="/usr/lib"
     PATH_UPOWER="/usr/bin"
+    set_current_upowerd
 
 elif [ "$OS" == "ubuntu" ]
 then
@@ -53,17 +54,19 @@ then
         PATH_UPOWERD="/usr/libexec"
         set_legacy_upowerd
 
+    elif [ ${OS_VER_MAJOR} -le 20 ]
+    then
+        echo "--- Ubuntu version 20.04 or lower detected"
+        PATH_UPOWERD="/usr/lib/upower"
+        set_legacy_upowerd
+
     elif [ ${OS_VER_MAJOR} -ge 21 ]
     then
         echo "--- Ubuntu version 21 or above detected"
         PATH_UPOWERD="/usr/libexec"
         set_legacy_upowerd
 
-    elif [ ${OS_VER_MAJOR} -le 20 ]
-    then
-        echo "--- Ubuntu version 20.04 or lower detected"
-        PATH_UPOWERD="/usr/lib/upower"
-        set_legacy_upowerd
+    # TODO: test with Ubuntu 21.10, and add configuration here if needed
     fi
 
 elif [ "$OS" == "debian" ]
@@ -97,7 +100,7 @@ git clone https://gitlab.freedesktop.org/upower/upower
 
 if [ -z ${UPOWER_BRANCH} ]
 then
-    echo "-- Using latest master branch (0.99.12 or above)"
+    echo "-- Using latest master branch (untested; may not work)"
     cd upower/src
 else
     echo "-- Using branch ${UPOWER_BRANCH} (latest compatible with your distro)"
