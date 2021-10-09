@@ -4,7 +4,6 @@
 	UpDeviceLevel warning_level, battery_level;
 	UpExportedDevice *skeleton = UP_EXPORTED_DEVICE (device);
 
-+
 +	/* Disable warning notifications for wireless mice with rechargeable batteries */
 +	/* See https://wrgms.com/disable-mouse-battery-low-spam-notification/ */
 +	int type = up_exported_device_get_type_ (skeleton);
