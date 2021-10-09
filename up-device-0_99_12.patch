@@ -1,5 +1,5 @@
 --- up-device.c	2021-07-18 00:27:11.329004126 -0400
-+++ up-device-silent.c	2021-07-18 00:27:51.785006055 -0400
++++ up-device-patched.c	2021-07-18 00:27:51.785006055 -0400
 @@ -63,6 +63,15 @@
  	UpDeviceLevel warning_level, battery_level;
  	UpExportedDevice *skeleton = UP_EXPORTED_DEVICE (device);
