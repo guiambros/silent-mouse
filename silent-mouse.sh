@@ -25,8 +25,8 @@ echo "--------------------------------------------------------------------------
 echo
 
 set_legacy_upowerd() {
-    UPOWER_BRANCH="UPOWER_0_99_12"
-    PATCH_NAME="up-device-0_99_12.patch"
+    UPOWER_BRANCH="UPOWER_0_99_11"
+    PATCH_NAME="up-device-0_99_11.patch"
 }
 
 set_current_upowerd() {

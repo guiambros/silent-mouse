@@ -3,7 +3,8 @@
 @@ -67,6 +67,15 @@
 	if (device->priv->daemon == NULL)
 		return;
- 
+
++
 +	/* Disable warning notifications for wireless mice with rechargeable batteries */
 +	int type = up_exported_device_get_type_ (skeleton);
 +	int state = up_exported_device_get_state(skeleton);
