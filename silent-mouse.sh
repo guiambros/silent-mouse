@@ -42,7 +42,10 @@ tested_versions["ubuntu_22.04"]="BRANCH='UPOWER_0_99_13' PATCH='up-device-0_99_1
 
 tested_versions["debian_10"]="BRANCH='UPOWER_0_99_10' PATCH='up-device-0_99_11.patch' PATH_UPOWERD='/usr/lib/upower'"
 tested_versions["debian_11"]="BRANCH='UPOWER_0_99_11' PATCH='up-device-0_99_13.patch'"
-tested_versions["debian_12"]="BRANCH='v0.99.20' PATCH='up-device-0_99_13.patch'"
+tested_versions["debian_12"]="BRANCH='UPOWER_0_99_13' PATCH='up-device-0_99_13.patch'"
+
+# FIXME: debian 12 uses upower 0.99.20, which migrated from autogen/make to meson build system
+# FIXME: tested_versions["debian_12"]="BRANCH='v0.99.20' PATCH='up-device-0_99_13.patch'"
 
 tested_versions["manjarolinux_*"]="BRANCH='UPOWER_0_99_13' PATCH='up-device-0_99_13.patch' PATH_UPOWER='/usr/sbin/' PATH_UPOWERD='/usr/lib'"
 
