@@ -68,17 +68,20 @@ echo -e "OS detected:\n--- OS = ${OS}\n--- OS_VER = ${OS_VER}\n\n"
 if [ "$OS" == "manjaro" ]
 then
     echo -e "-- Manjaro detected; installing required libraries\n\n"
-    sudo pacman -Syu --noconfirm base-devel gtk-doc gobject-introspection git libtool meson autoconf automake make 
+    sudo pacman -Syu --noconfirm base-devel gtk-doc gobject-introspection \
+        git libtool meson autoconf automake make 
 
 elif [ "$OS" == "ubuntu" ]
 then
     echo -e "-- Ubuntu detected; installing required libraries\n\n"
-    sudo apt install -y git gtk-doc-tools gobject-introspection libgudev-1.0-dev libusb-1.0-0-dev autoconf libtool autopoint
+    sudo apt install -y git gtk-doc-tools gobject-introspection \
+        libgudev-1.0-dev libusb-1.0-0-dev autoconf libtool autopoint intltool
 
 elif [ "$OS" == "debian" ]
 then
     echo -e "-- Debian detected; installing required libraries\n\n"
-    sudo apt install -y git gtk-doc-tools gobject-introspection libgudev-1.0-dev libusb-1.0-0-dev autoconf libtool autopoint
+    sudo apt install -y git gtk-doc-tools gobject-introspection libgudev-1.0-dev \
+        libusb-1.0-0-dev autoconf libtool autopoint
 else
     echo "-- Unknown system; this script was only tested on ubuntu, debian and manjaro."
     exit 1
