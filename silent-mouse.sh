@@ -105,7 +105,7 @@ elif [ "$OS" == "debian" ]
 then
     echo -e "-- Debian detected; installing required libraries\n\n"
     sudo apt install -y git gtk-doc-tools gobject-introspection libgudev-1.0-dev \
-        libusb-1.0-0-dev autoconf libtool autopoint
+        libusb-1.0-0-dev autoconf libtool autopoint intltool
 else
     echo "-- Unknown system; this script was only tested on ubuntu, debian and manjaro."
     exit 1
