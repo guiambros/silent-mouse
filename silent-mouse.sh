@@ -17,7 +17,6 @@ OS_VER_MAJOR=`echo ${OS_VER} | awk -F. '{print $1}'`
 UPOWER_ORIG_VER=`upower --version`
 
 # Check distro and upower version in use, and install required libraries
-#
 echo
 echo "---------------------------------------------------------------------------"
 upower --version
@@ -88,9 +87,7 @@ set_upower_branch $OS $OS_VER
 echo "---------------------------------------------------------------------------"
 echo
 
-
 # Download upowerd source and selects the proper branch
-#
 git clone https://gitlab.freedesktop.org/upower/upower
 
 if [ -z ${UPOWER_BRANCH} ]
@@ -105,28 +102,22 @@ else
     cd src
 fi
 
-
 # Download and patch upowerd
-#
-cp ../../${PATCH_NAME} .
+cp ../../${PATCH} .
 if [ "$1" == "-keyboard" ] || [ "$1" == "--keyboard" ]; then
         SILENCE_KEYBOARD="+     if ((type == UP_DEVICE_KIND_MOUSE || type == UP_DEVICE_KIND_KEYBOARD) && state == UP_DEVICE_STATE_DISCHARGING) {"
-        sed -i "/UP_DEVICE_KIND_MOUSE/c${SILENCE_KEYBOARD}" ${PATCH_NAME}
+        sed -i "/UP_DEVICE_KIND_MOUSE/c${SILENCE_KEYBOARD}" ${PATCH}
 fi
-patch -F 1 < ${PATCH_NAME}
+patch -F 1 < ${PATCH}
 
 # Compile upowerd
-#
 cd ..
 ./autogen.sh
 ./configure
 make
 
-
 # Install upowerd
-#
 CUR_DATETIME=`date +%Y-%m-%d-%H%M%S`
-
 pushd .
 cd src/.libs
 strip upowerd
@@ -137,9 +128,7 @@ sudo mv upowerd upowerd-original-${CUR_DATETIME}
 sudo ln -s upowerd-silent upowerd
 popd
 
-
 # Install upower
-#
 pushd .
 cd tools/.libs
 strip upower
@@ -150,14 +139,10 @@ sudo mv upower upower-original-${CUR_DATETIME}
 sudo ln -s upower-silent upower
 popd
 
-
 # Restart upowerd
-#
 sudo systemctl restart upower
 
-
-# Compare versions before/after (they will likely be different, but it depends on what your distro packages by default)
-#
+# Compare versions before/after (they will likely be different, but it depends on distro defaults)
 echo
 echo "---------------------------------------------------------------------------"
 echo "upower version BEFORE the update:"
