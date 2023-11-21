@@ -85,6 +85,7 @@ echo -e "OS detected:\n--- OS = ${OS}\n--- OS_VER = ${OS_VER}\n\n"
 set_upower_branch $OS $OS_VER
 
 if [ "$DEBUG_VARS" == "true" ]
+then
     debug_vars
     exit 0
 
