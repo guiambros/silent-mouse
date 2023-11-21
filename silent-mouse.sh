@@ -24,72 +24,67 @@ upower --version
 echo "---------------------------------------------------------------------------"
 echo
 
-set_legacy_upowerd() {
-    UPOWER_BRANCH="UPOWER_0_99_11"
-    PATCH_NAME="up-device-0_99_11.patch"
+declare -A tested_versions
+
+# list of all versions tested
+PATH_UPOWER="/usr/bin"
+PATH_UPOWERD="/usr/libexec"
+tested_versions["ubuntu_18.04"]="BRANCH='UPOWER_0_99_7' PATCH='up-device-0_99_11.patch' PATH_UPOWERD='/usr/lib/upower'"
+tested_versions["ubuntu_20.04"]="BRANCH='UPOWER_0_99_11' PATCH='up-device-0_99_11.patch' PATH_UPOWERD='/usr/lib/upower'"
+tested_versions["ubuntu_22.04"]="BRANCH='UPOWER_0_99_17' PATCH='up-device-0_99_13.patch'"
+#u23.10 moves to 1.90.2
+# this will likely require new patches
+# tested_versions["ubuntu_23.10"]="BRANCH='UPOWER_0_99_xx' PATCH='up-device-0_99_xx.patch'"
+
+tested_versions["debian_10"]="BRANCH='UPOWER_0_99_10' PATCH='up-device-0_99_11.patch' PATH_UPOWERD='/usr/lib/upower'"
+tested_versions["debian_11"]="BRANCH='UPOWER_0_99_11' PATCH='up-device-0_99_13.patch'"
+tested_versions["debian_12"]="BRANCH='UPOWER_0_99_20' PATCH='up-device-0_99_13.patch'"
+
+tested_versions["majaro_*"]="BRANCH='UPOWER_0_99_13' PATCH='up-device-0_99_13.patch' PATH_UPOWER='/usr/sbin/' PATH_UPOWERD='/usr/lib'"
+
+set_upower_branch() {
+    local key="${1}_${2}"
+    local found=0
+    local values=${tested_versions[$key]}
+    if [[ -n ${tested_versions[$key]} ]]; then
+        eval "${tested_versions[$key]}"
+        found=1
+    else
+        for k in "${!tested_versions[@]}"; do
+            if [[ $k == "$1_"* ]]; then
+                eval "${tested_versions[$k]}"
+                found=1
+                break
+            fi
+        done
+    fi
+
+    if [[ $found -eq 0 ]]; then
+        echo "No entry found for $1 with $2"
+    fi
 }
 
-set_current_upowerd() {
-    UPOWER_BRANCH="UPOWER_0_99_13"
-    PATCH_NAME="up-device-0_99_13.patch"
-}
+echo -e "OS detected:\n--- OS = ${OS}\n--- OS_VER = ${OS_VER}\n\n"
 
 if [ "$OS" == "manjaro" ]
 then
-    echo "-- Manjaro detected; installing required libraries"
+    echo -e "-- Manjaro detected; installing required libraries\n\n"
     sudo pacman -Syu --noconfirm base-devel gtk-doc gobject-introspection git libtool meson autoconf automake make 
-    PATH_UPOWERD="/usr/lib"
-    PATH_UPOWER="/usr/bin"
-    set_current_upowerd
 
 elif [ "$OS" == "ubuntu" ]
 then
-    echo "-- Ubuntu detected; installing required libraries"
+    echo -e "-- Ubuntu detected; installing required libraries\n\n"
     sudo apt install -y git gtk-doc-tools gobject-introspection libgudev-1.0-dev libusb-1.0-0-dev autoconf libtool autopoint
-    PATH_UPOWER="/usr/bin"
-
-    if [ "${OS_VER}" == "20.10" ]
-    then
-        echo "--- Ubuntu version 20.10 (Groovy Gorilla) detected"
-        PATH_UPOWERD="/usr/libexec"
-        set_legacy_upowerd
-
-    elif [ ${OS_VER_MAJOR} -le 20 ]
-    then
-        echo "--- Ubuntu version 20.04 or lower detected"
-        PATH_UPOWERD="/usr/lib/upower"
-        set_legacy_upowerd
-
-    elif [ ${OS_VER_MAJOR} -ge 21 ]
-    then
-        echo "--- Ubuntu version 21 or above detected"
-        PATH_UPOWERD="/usr/libexec"
-        set_legacy_upowerd
-
-    # TODO: test with Ubuntu 21.10, and add configuration here if needed
-    fi
 
 elif [ "$OS" == "debian" ]
 then
-    echo "-- Debian detected; installing required libraries"
+    echo -e "-- Debian detected; installing required libraries\n\n"
     sudo apt install -y git gtk-doc-tools gobject-introspection libgudev-1.0-dev libusb-1.0-0-dev autoconf libtool autopoint
-    set_legacy_upowerd
-    if [ ${OS_VER_MAJOR} -le 10 ]
-    then
-        PATH_UPOWERD="/usr/lib/upower"
-        PATH_UPOWER="/usr/bin"
-    elif [ ${OS_VER_MAJOR} -ge 11 ]
-    then
-        PATH_UPOWERD="/usr/libexec"
-        PATH_UPOWER="/usr/bin"
-    else
-        echo "-- Unknown Debian system [${OS_VER} / ${OS_VER_MAJOR}]."
-        exit 1    
-    fi
 else
-    echo "-- Unknown system; this script was only tested on ubuntu and manjaro."
+    echo "-- Unknown system; this script was only tested on ubuntu, debian and manjaro."
     exit 1
 fi
+set_upower_branch $OS $OS_VER
 echo "---------------------------------------------------------------------------"
 echo
 
