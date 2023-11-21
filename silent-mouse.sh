@@ -112,7 +112,7 @@ if [ "$1" == "-keyboard" ] || [ "$1" == "--keyboard" ]; then
         SILENCE_KEYBOARD="+     if ((type == UP_DEVICE_KIND_MOUSE || type == UP_DEVICE_KIND_KEYBOARD) && state == UP_DEVICE_STATE_DISCHARGING) {"
         sed -i "/UP_DEVICE_KIND_MOUSE/c${SILENCE_KEYBOARD}" ${PATCH}
 fi
-patch -F 1 < ${PATCH}
+patch -F 2 < ${PATCH}
 
 # Compile upowerd
 cd ..
