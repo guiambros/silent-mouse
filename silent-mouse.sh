@@ -39,7 +39,7 @@ tested_versions["debian_10"]="BRANCH='UPOWER_0_99_10' PATCH='up-device-0_99_11.p
 tested_versions["debian_11"]="BRANCH='UPOWER_0_99_11' PATCH='up-device-0_99_13.patch'"
 tested_versions["debian_12"]="BRANCH='UPOWER_0_99_20' PATCH='up-device-0_99_13.patch'"
 
-tested_versions["majaro_*"]="BRANCH='UPOWER_0_99_13' PATCH='up-device-0_99_13.patch' PATH_UPOWER='/usr/sbin/' PATH_UPOWERD='/usr/lib'"
+tested_versions["manjarolinux_*"]="BRANCH='UPOWER_0_99_13' PATCH='up-device-0_99_13.patch' PATH_UPOWER='/usr/sbin/' PATH_UPOWERD='/usr/lib'"
 
 set_upower_branch() {
     local key="${1}_${2}"
@@ -90,15 +90,15 @@ echo
 # Download upowerd source and selects the proper branch
 git clone https://gitlab.freedesktop.org/upower/upower
 
-if [ -z ${UPOWER_BRANCH} ]
+if [ -z ${BRANCH} ]
 then
     echo "-- Using latest master branch (untested; may not work)"
     cd upower/src
 else
-    echo "-- Using branch ${UPOWER_BRANCH} (latest compatible with your distro)"
+    echo "-- Using branch ${BRANCH} (latest compatible with your distro)"
     cd upower
     git fetch --all --tags
-    git checkout tags/${UPOWER_BRANCH} -b ${UPOWER_BRANCH}
+    git checkout tags/${BRANCH} -b ${BRANCH}
     cd src
 fi
 
