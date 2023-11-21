@@ -15,6 +15,7 @@ OS=`awk -F= '/^ID=/{print $2}' /etc/os-release`
 OS_VER=`awk -F= '/^VERSION_ID=/{print $2}' /etc/os-release | cut -d "\"" -f 2`
 OS_VER_MAJOR=`echo ${OS_VER} | awk -F. '{print $1}'`
 UPOWER_ORIG_VER=`upower --version`
+DEBUG_VARS="false"
 
 # Check distro and upower version in use, and install required libraries
 echo
@@ -64,9 +65,25 @@ set_upower_branch() {
     fi
 }
 
+debug_vars() {
+    echo PATH_UPOWER = ${PATH_UPOWER}
+    echo PATH_UPOWERD = ${PATH_UPOWERD}
+    echo OS = ${OS}
+    echo OS_VER = ${OS_VER}
+    echo OS_VER_MAJOR = ${OS_VER_MAJOR}
+    echo UPOWER_ORIG_VER = ${UPOWER_ORIG_VER}
+    echo BRANCH = ${BRANCH}
+    echo PATCH = ${PATCH}
+    echo PATH_UPOWER = ${PATH_UPOWER}
+    echo PATH_UPOWERD = ${PATH_UPOWERD}
+}
 echo -e "OS detected:\n--- OS = ${OS}\n--- OS_VER = ${OS_VER}\n\n"
 
-if [ "$OS" == "manjaro" ]
+if [ "$DEBUG_VARS" == "true" ]
+    debug_vars
+    exit 0
+
+elif [ "$OS" == "manjaro" ]
 then
     echo -e "-- Manjaro detected; installing required libraries\n\n"
     sudo pacman -Syu --noconfirm base-devel gtk-doc gobject-introspection \
@@ -87,6 +104,7 @@ else
     echo "-- Unknown system; this script was only tested on ubuntu, debian and manjaro."
     exit 1
 fi
+
 set_upower_branch $OS $OS_VER
 echo "---------------------------------------------------------------------------"
 echo
