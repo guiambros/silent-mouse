@@ -30,14 +30,15 @@ PATH_UPOWER="/usr/bin"
 PATH_UPOWERD="/usr/libexec"
 tested_versions["ubuntu_18.04"]="BRANCH='UPOWER_0_99_7' PATCH='up-device-0_99_11.patch' PATH_UPOWERD='/usr/lib/upower'"
 tested_versions["ubuntu_20.04"]="BRANCH='UPOWER_0_99_11' PATCH='up-device-0_99_11.patch' PATH_UPOWERD='/usr/lib/upower'"
-tested_versions["ubuntu_22.04"]="BRANCH='UPOWER_0_99_17' PATCH='up-device-0_99_13.patch'"
+tested_versions["ubuntu_22.04"]="BRANCH='v0.99.17' PATCH='up-device-0_99_13.patch'"
+
 #u23.10 moves to 1.90.2
 # this will likely require new patches
 # tested_versions["ubuntu_23.10"]="BRANCH='UPOWER_0_99_xx' PATCH='up-device-0_99_xx.patch'"
 
 tested_versions["debian_10"]="BRANCH='UPOWER_0_99_10' PATCH='up-device-0_99_11.patch' PATH_UPOWERD='/usr/lib/upower'"
 tested_versions["debian_11"]="BRANCH='UPOWER_0_99_11' PATCH='up-device-0_99_13.patch'"
-tested_versions["debian_12"]="BRANCH='UPOWER_0_99_20' PATCH='up-device-0_99_13.patch'"
+tested_versions["debian_12"]="BRANCH='v0.99.20' PATCH='up-device-0_99_13.patch'"
 
 tested_versions["manjarolinux_*"]="BRANCH='UPOWER_0_99_13' PATCH='up-device-0_99_13.patch' PATH_UPOWER='/usr/sbin/' PATH_UPOWERD='/usr/lib'"
 
