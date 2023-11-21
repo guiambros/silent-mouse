@@ -151,7 +151,8 @@ CUR_DATETIME=`date +%Y-%m-%d-%H%M%S`
 pushd .
 cd src/.libs
 strip upowerd
-sudo chown root.root upowerd
+sudo chown root upowerd
+sudo chgrp root upowerd
 sudo mv upowerd ${PATH_UPOWERD}/upowerd-silent
 cd ${PATH_UPOWERD}
 sudo mv upowerd upowerd-original-${CUR_DATETIME}
@@ -162,7 +163,8 @@ popd
 pushd .
 cd tools/.libs
 strip upower
-sudo chown root.root upower
+sudo chown root upower
+sudo chgrp root upower
 sudo mv upower ${PATH_UPOWER}/upower-silent
 cd ${PATH_UPOWER}
 sudo mv upower upower-original-${CUR_DATETIME}
