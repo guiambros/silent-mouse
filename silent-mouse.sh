@@ -31,11 +31,14 @@ PATH_UPOWER="/usr/bin"
 PATH_UPOWERD="/usr/libexec"
 tested_versions["ubuntu_18.04"]="BRANCH='UPOWER_0_99_7' PATCH='up-device-0_99_11.patch' PATH_UPOWERD='/usr/lib/upower'"
 tested_versions["ubuntu_20.04"]="BRANCH='UPOWER_0_99_11' PATCH='up-device-0_99_11.patch' PATH_UPOWERD='/usr/lib/upower'"
-tested_versions["ubuntu_22.04"]="BRANCH='v0.99.17' PATCH='up-device-0_99_13.patch'"
+tested_versions["ubuntu_22.04"]="BRANCH='v0.99.13' PATCH='up-device-0_99_13.patch'"
 
-#u23.10 moves to 1.90.2
-# this will likely require new patches
-# tested_versions["ubuntu_23.10"]="BRANCH='UPOWER_0_99_xx' PATCH='up-device-0_99_xx.patch'"
+# FIXME: u22.04 moved to v0.99.17, which changed from make/autoconfigure to meson build system
+#        Using old version 0.99.13 for the time being
+# FIXME: tested_versions["ubuntu_22.04"]="BRANCH='v0.99.17' PATCH='up-device-0_99_13.patch'"
+
+# FIXME: u23.10 moved to upower 1.90.2; require new testing and likely new patches
+# FIXME: tested_versions["ubuntu_23.10"]="BRANCH='UPOWER_0_99_xx' PATCH='up-device-0_99_xx.patch'"
 
 tested_versions["debian_10"]="BRANCH='UPOWER_0_99_10' PATCH='up-device-0_99_11.patch' PATH_UPOWERD='/usr/lib/upower'"
 tested_versions["debian_11"]="BRANCH='UPOWER_0_99_11' PATCH='up-device-0_99_13.patch'"
@@ -66,18 +69,20 @@ set_upower_branch() {
 }
 
 debug_vars() {
-    echo PATH_UPOWER = ${PATH_UPOWER}
-    echo PATH_UPOWERD = ${PATH_UPOWERD}
-    echo OS = ${OS}
-    echo OS_VER = ${OS_VER}
-    echo OS_VER_MAJOR = ${OS_VER_MAJOR}
-    echo UPOWER_ORIG_VER = ${UPOWER_ORIG_VER}
-    echo BRANCH = ${BRANCH}
-    echo PATCH = ${PATCH}
-    echo PATH_UPOWER = ${PATH_UPOWER}
-    echo PATH_UPOWERD = ${PATH_UPOWERD}
+    echo PATH_UPOWER=${PATH_UPOWER}
+    echo PATH_UPOWERD=${PATH_UPOWERD}
+    echo OS=${OS}
+    echo OS_VER=${OS_VER}
+    echo OS_VER_MAJOR=${OS_VER_MAJOR}
+    echo UPOWER_ORIG_VER=${UPOWER_ORIG_VER}
+    echo BRANCH=${BRANCH}
+    echo PATCH=${PATCH}
+    echo PATH_UPOWER=${PATH_UPOWER}
+    echo PATH_UPOWERD=${PATH_UPOWERD}
 }
+
 echo -e "OS detected:\n--- OS = ${OS}\n--- OS_VER = ${OS_VER}\n\n"
+set_upower_branch $OS $OS_VER
 
 if [ "$DEBUG_VARS" == "true" ]
     debug_vars
@@ -105,7 +110,6 @@ else
     exit 1
 fi
 
-set_upower_branch $OS $OS_VER
 echo "---------------------------------------------------------------------------"
 echo
 
