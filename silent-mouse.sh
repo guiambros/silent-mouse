@@ -100,9 +100,13 @@ then
 
 elif [ "$OS" == "ubuntu" ]
 then
+    if [ "$OS_VER_MAJOR" -ge 22 ]
+    then
+        ADDT_PACKAGES="meson ninja-build libimobiledevice-dev libgirepository1.0-dev"
+    fi
     echo -e "-- Ubuntu detected; installing required libraries\n\n"
-    sudo apt install -y git gtk-doc-tools gobject-introspection \
-        libgudev-1.0-dev libusb-1.0-0-dev autoconf libtool autopoint intltool
+    sudo apt install -y git gtk-doc-tools gobject-introspection libgudev-1.0-dev \
+    libusb-1.0-0-dev autoconf libtool autopoint intltool ${ADDT_PACKAGES}
 
 elif [ "$OS" == "debian" ]
 then
@@ -131,6 +135,10 @@ else
     git checkout tags/${BRANCH} -b ${BRANCH}
     cd src
 fi
+
+# meson/ninja
+#meson _build -Dintrospection=enabled -Dman=true -Dgtk-doc=true -Didevice=enabled
+
 
 # Download and patch upowerd
 cp ../../${PATCH} .
