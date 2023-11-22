@@ -12,8 +12,9 @@ jobs:
     strategy:
       matrix:
         #distro-versions: ['debian:10', 'debian:11', 'debian:12']
-        distro-versions: ['debian:12']
+        #distro-versions: ['debian:12']
         #distro-versions: ['debian:10', 'debian:11']
+        distro-versions: ['ubuntu:18.04', 'ubuntu:20.04', 'ubuntu:22.04', 'debian:10', 'debian:11', 'debian:12']
         #distro-versions: ['ubuntu:18.04', 'ubuntu:20.04', 'ubuntu:22.04', 'debian:10', 'debian:11', 'debian:12', 'manjarolinux/base:latest']
         #distro-versions: ['ubuntu:18.04', 'ubuntu:20.04', 'ubuntu:22.04']
         #distro-versions: ['ubuntu:22.04']
@@ -27,4 +28,4 @@ jobs:
 
     - name: Run Script in Docker Container
       run: |
-        docker run -t --privileged test-env /bin/bash -c "git clone https://github.com/guiambros/silent-mouse; cd silent-mouse; bash silent-mouse.sh"
+        docker run -t --privileged test-env /bin/bash -c "git clone https://github.com/guiambros/silent-mouse; git fetch; git switch dev; cd silent-mouse; bash silent-mouse.sh"
