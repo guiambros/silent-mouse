@@ -205,3 +205,4 @@ echo "-------------------------------------"
 echo "upower version AFTER the update (likely same version, or a minor number above/below):"
 upower --version
 echo "-------------------------------------"
+
