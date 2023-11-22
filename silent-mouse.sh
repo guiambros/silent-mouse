@@ -15,6 +15,7 @@ OS=`awk -F= '/^ID=/{print $2}' /etc/os-release`
 OS_VER=`awk -F= '/^VERSION_ID=/{print $2}' /etc/os-release | cut -d "\"" -f 2`
 OS_VER_MAJOR=`echo ${OS_VER} | awk -F. '{print $1}'`
 UPOWER_ORIG_VER=`upower --version`
+USE_MESON="false"
 DEBUG_VARS="false"
 
 # Check distro and upower version in use, and install required libraries
@@ -68,6 +69,11 @@ set_upower_branch() {
 
     if [[ $found -eq 0 ]]; then
         echo "No entry found for $1 with $2"
+        exit 1
+    fi
+
+    if [ "${key}" == "ubuntu_22" ] || [ "${key}" == "debian_12" ]; then
+        USE_MESON="true"
     fi
 }
 
@@ -87,20 +93,17 @@ debug_vars() {
 echo -e "OS detected:\n--- OS = ${OS}\n--- OS_VER = ${OS_VER}\n\n"
 set_upower_branch $OS $OS_VER
 
-if [ "$DEBUG_VARS" == "true" ]
-then
+if [ "$DEBUG_VARS" == "true" ]; then
     debug_vars
     exit 0
 
-elif [ "$OS" == "manjaro" ]
-then
+elif [ "$OS" == "manjaro" ]; then
     echo -e "-- Manjaro detected; installing required libraries\n\n"
     sudo pacman -Syu --noconfirm base-devel gtk-doc gobject-introspection \
         git libtool meson autoconf automake make 
 
-elif [ "$OS" == "ubuntu" ]
-then
-    if [ "$OS_VER_MAJOR" -ge 22 ]
+elif [ "$OS" == "ubuntu" ]; then
+    if [ "${USE_MESON}" == "true" ]
     then
         ADDT_PACKAGES="meson ninja-build libimobiledevice-dev libgirepository1.0-dev"
     fi
@@ -108,13 +111,20 @@ then
     sudo apt install -y git gtk-doc-tools gobject-introspection libgudev-1.0-dev \
     libusb-1.0-0-dev autoconf libtool autopoint intltool ${ADDT_PACKAGES}
 
-elif [ "$OS" == "debian" ]
-then
+
+elif [ "$OS" == "debian" ]; then
+    if [ "${USE_MESON}" == "true" ]
+    then
+        ADDT_PACKAGES="meson ninja-build libimobiledevice-dev libgirepository1.0-dev"
+    fi
     echo -e "-- Debian detected; installing required libraries\n\n"
     sudo apt install -y git gtk-doc-tools gobject-introspection libgudev-1.0-dev \
-        libusb-1.0-0-dev autoconf libtool autopoint intltool
+        libusb-1.0-0-dev autoconf libtool autopoint intltool ${ADDT_PACKAGES}
+
 else
-    echo "-- Unknown system; this script was only tested on ubuntu, debian and manjaro."
+    echo "-- Unknown system; this script wasn't tested with your OS. Please open an issue on GitHub."
+    echo "-- https://github.com/guiambros/silent-mouse/issues"
+    debug_vars
     exit 1
 fi
 
@@ -124,8 +134,7 @@ echo
 # Download upowerd source and selects the proper branch
 git clone https://gitlab.freedesktop.org/upower/upower
 
-if [ -z ${BRANCH} ]
-then
+if [ -z ${BRANCH} ]; then
     echo "-- Using latest master branch (untested; may not work)"
     cd upower/src
 else
@@ -136,9 +145,6 @@ else
     cd src
 fi
 
-# meson/ninja
-#meson _build -Dintrospection=enabled -Dman=true -Dgtk-doc=true -Didevice=enabled
-
 
 # Download and patch upowerd
 cp ../../${PATCH} .
@@ -147,12 +153,21 @@ if [ "$1" == "-keyboard" ] || [ "$1" == "--keyboard" ]; then
         sed -i "/UP_DEVICE_KIND_MOUSE/c${SILENCE_KEYBOARD}" ${PATCH}
 fi
 patch -F 2 < ${PATCH}
+cd ..
 
 # Compile upowerd
-cd ..
-./autogen.sh
-./configure
-make
+if [ "${USE_MESON}" == "false" ]; then
+    ./autogen.sh
+    ./configure
+    make
+elif [ "${USE_MESON}" == "true" ]; then
+    meson _build -Dintrospection=enabled -Dman=true -Dgtk-doc=true -Didevice=enabled
+    meson test -C _build --print-errorlogs --no-stdsplit
+    ninja -C _build
+else
+    echo "Invalid state; please open an issue on GitHub."
+    exit 1
+fi
 
 # Install upowerd
 CUR_DATETIME=`date +%Y-%m-%d-%H%M%S`
