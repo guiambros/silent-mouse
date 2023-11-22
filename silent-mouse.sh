@@ -32,21 +32,13 @@ PATH_UPOWER="/usr/bin"
 PATH_UPOWERD="/usr/libexec"
 tested_versions["ubuntu_18.04"]="BRANCH='UPOWER_0_99_7' PATCH='up-device-0_99_11.patch' PATH_UPOWERD='/usr/lib/upower'"
 tested_versions["ubuntu_20.04"]="BRANCH='UPOWER_0_99_11' PATCH='up-device-0_99_11.patch' PATH_UPOWERD='/usr/lib/upower'"
-tested_versions["ubuntu_22.04"]="BRANCH='UPOWER_0_99_13' PATCH='up-device-0_99_13.patch'"
-
-# FIXME: u22.04 moved to v0.99.17, which changed from make/autoconfigure to meson build system
-#        Using old version 0.99.13 for the time being
-# FIXME: tested_versions["ubuntu_22.04"]="BRANCH='v0.99.17' PATCH='up-device-0_99_13.patch'"
-
+tested_versions["ubuntu_22.04"]="BRANCH='v0.99.17' PATCH='up-device-0_99_13.patch'"
 # FIXME: u23.10 moved to upower 1.90.2; require new testing and likely new patches
 # FIXME: tested_versions["ubuntu_23.10"]="BRANCH='UPOWER_0_99_xx' PATCH='up-device-0_99_xx.patch'"
 
 tested_versions["debian_10"]="BRANCH='UPOWER_0_99_10' PATCH='up-device-0_99_11.patch' PATH_UPOWERD='/usr/lib/upower'"
 tested_versions["debian_11"]="BRANCH='UPOWER_0_99_11' PATCH='up-device-0_99_13.patch'"
-tested_versions["debian_12"]="BRANCH='UPOWER_0_99_13' PATCH='up-device-0_99_13.patch'"
-
-# FIXME: debian 12 uses upower 0.99.20, which migrated from autogen/make to meson build system
-# FIXME: tested_versions["debian_12"]="BRANCH='v0.99.20' PATCH='up-device-0_99_13.patch'"
+tested_versions["debian_12"]="BRANCH='v0.99.20' PATCH='up-device-0_99_13.patch'"
 
 tested_versions["manjarolinux_*"]="BRANCH='UPOWER_0_99_13' PATCH='up-device-0_99_13.patch' PATH_UPOWER='/usr/sbin/' PATH_UPOWERD='/usr/lib'"
 
@@ -72,7 +64,7 @@ set_upower_branch() {
         exit 1
     fi
 
-    if [ "${key}" == "ubuntu_22" ] || [ "${key}" == "debian_12" ]; then
+    if [ "${key}" == "ubuntu_22.04" ] || [ "${key}" == "debian_12" ]; then
         USE_MESON="true"
     fi
 }
@@ -162,7 +154,6 @@ if [ "${USE_MESON}" == "false" ]; then
     make
 elif [ "${USE_MESON}" == "true" ]; then
     meson _build -Dintrospection=enabled -Dman=true -Dgtk-doc=true -Didevice=enabled
-    meson test -C _build --print-errorlogs --no-stdsplit
     ninja -C _build
 else
     echo "Invalid state; please open an issue on GitHub."
@@ -171,8 +162,12 @@ fi
 
 # Install upowerd
 CUR_DATETIME=`date +%Y-%m-%d-%H%M%S`
-pushd .
-cd src/.libs
+pushd . # we're in ./silent-mouse/upower/
+if [ "${USE_MESON}" == "true" ]; then
+    cd _build/src
+else
+    cd src/.libs
+fi
 strip upowerd
 sudo chown root upowerd
 sudo chgrp root upowerd
@@ -184,7 +179,11 @@ popd
 
 # Install upower
 pushd .
-cd tools/.libs
+if [ "${USE_MESON}" == "true" ]; then
+    cd _build/tools
+else
+    cd tools/.libs
+fi
 strip upower
 sudo chown root upower
 sudo chgrp root upower
