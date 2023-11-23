@@ -1,32 +1,28 @@
-name: Test silent-mouse script across ubuntu distros
+name: 'Test on various Linux distros'
 
 on:
+  workflow_dispatch:
   push:
-    branches: [ main ]
-  pull_request:
     branches: [ main ]
 
 jobs:
-  test:
+  linux-distros:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        #distro-versions: ['debian:10', 'debian:11', 'debian:12']
-        #distro-versions: ['debian:12']
-        #distro-versions: ['debian:10', 'debian:11']
-        #distro-versions: ['ubuntu:18.04', 'ubuntu:20.04', 'ubuntu:22.04', 'debian:10', 'debian:11', 'debian:12']
-        #distro-versions: ['ubuntu:18.04', 'ubuntu:20.04', 'ubuntu:22.04', 'debian:10', 'debian:11', 'debian:12', 'manjarolinux/base:latest']
-        distro-versions: ['ubuntu:18.04']
-        #distro-versions: ['ubuntu:18.04', 'ubuntu:20.04', 'ubuntu:22.04']
-        #distro-versions: ['ubuntu:22.04']
+        distro-versions: ['ubuntu:16.04', 'ubuntu:18.04', 'ubuntu:20.04', 'ubuntu:22.04', 'debian:10', 'debian:11', 'debian:12', 'manjarolinux/base:latest']
+  
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v4
-
-    - name: Build Docker Image
+    - name: Check package system installed
       run: |
-        docker build -t test-env --build-arg DISTRO_VERSION=${{ matrix.distro-versions }} .
-
-    - name: Run Script in Docker Container
+        if [[ ${{ matrix.distro-versions }} == *manjaro* ]]; then \
+          ln -s Dockerfile-pacman Dockerfile; else \
+          ln -s Dockerfile-debian Dockerfile; fi
+    - name: Build docker environment
       run: |
-        docker run -t --privileged test-env /bin/bash -c "git clone https://github.com/guiambros/silent-mouse; cd silent-mouse; git fetch; git checkout dev; bash silent-mouse.sh"
+        docker build -t test_env --build-arg DISTRO_VERSION=${{ matrix.distro-versions }} .
+    - name: Test script on ${{ matrix.distro-versions }}
+      run: |
+        docker run -t --privileged test_env /bin/bash -c "cd /repo; git checkout dev; bash silent-mouse.sh; exit"

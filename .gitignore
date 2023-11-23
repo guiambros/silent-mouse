@@ -1,4 +1,5 @@
 test-container/
+helloworld-actions/
 .vscode/
 build
 run-it
