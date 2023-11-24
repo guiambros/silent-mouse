@@ -3,7 +3,7 @@ name: 'Test on various Linux distros'
 on:
   workflow_dispatch:
   push:
-    branches: [ main ]
+    branches: [ dev ]
 
 jobs:
   linux-distros:
