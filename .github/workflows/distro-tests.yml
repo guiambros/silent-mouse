@@ -9,8 +9,9 @@ jobs:
   linux-distros:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        distro-versions: ['ubuntu:16.04', 'ubuntu:18.04', 'ubuntu:20.04', 'ubuntu:22.04', 'debian:10', 'debian:11', 'debian:12', 'manjarolinux/base:latest']
+        distro-versions: ['ubuntu:18.04', 'ubuntu:20.04', 'ubuntu:22.04', 'debian:10', 'debian:11', 'debian:12', 'manjarolinux/base:latest']
   
     steps:
     - name: Checkout Repository
