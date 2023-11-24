@@ -10,28 +10,16 @@ set -e
 # See https://wrgms.com/disable-mouse-battery-low-spam-notification/
 # for details
 
-
-OS=`awk -F= '/^ID=/{print $2}' /etc/os-release`
-OS_VER=`awk -F= '/^VERSION_ID=/{print $2}' /etc/os-release | cut -d "\"" -f 2`
-OS_VER_MAJOR=`echo ${OS_VER} | awk -F. '{print $1}'`
-UPOWER_ORIG_VER=`upower --version`
-DEBUG_VARS="false"
+# Configuration variables
 BUILD_SYSTEM="cmake" # use the classic cmake or the newer mason (in more recent distros)
-
-# Check distro and upower version in use, and install required libraries
-echo
-echo "---------------------------------------------------------------------------"
-upower --version
-echo "---------------------------------------------------------------------------"
-echo
-
-declare -A tested_versions
-
-# list of all versions tested
 PATH_UPOWER="/usr/bin"
 PATH_UPOWERD="/usr/libexec"
 PATCH_LEGACY="up-device-0_99_11.patch"
 PATCH_AFTER_v13="up-device-0_99_13.patch"
+DEBUG_VARS="false"
+declare -A tested_versions
+
+# list of all versions tested
 tested_versions["ubuntu_16.04"]="BRANCH='UPOWER_0_99_4' PATCH=${PATCH_LEGACY} PATH_UPOWERD='/usr/lib/upower'"
 tested_versions["ubuntu_18.04"]="BRANCH='UPOWER_0_99_7' PATCH=${PATCH_LEGACY} PATH_UPOWERD='/usr/lib/upower'"
 tested_versions["ubuntu_20.04"]="BRANCH='UPOWER_0_99_11' PATCH=${PATCH_LEGACY} PATH_UPOWERD='/usr/lib/upower'"
@@ -57,13 +45,14 @@ set_upower_branch() {
 }
 
 unknown_system() {
-    echo "-- Unknown system; this script wasn't tested with your OS. Please open"
-    echo "-- an issue and add debug info below: https://github.com/guiambros/silent-mouse/issues"
+    echo "-- ERROR: Unknown system; this script wasn't tested with your OS. Please open"
+    echo "-- an issue and include debug info below: https://github.com/guiambros/silent-mouse/issues"
     debug_vars
     exit 1
 }
 
 debug_vars() {
+    echo -e "\n-- Debug variables:"
     echo PATH_UPOWER=${PATH_UPOWER}
     echo PATH_UPOWERD=${PATH_UPOWERD}
     echo OS=${OS}
@@ -75,8 +64,38 @@ debug_vars() {
     echo PATH_UPOWER=${PATH_UPOWER}
     echo PATH_UPOWERD=${PATH_UPOWERD}
     echo BUILD_SYSTEM=${BUILD_SYSTEM}
+    echo
 }
 
+# Detect running OS and confirm upower is installed
+OS=`awk -F= '/^ID=/{print $2}' /etc/os-release`
+
+# manjaro uses a rolling release schedule, without major/minor releases; try lsb_release instead
+if [ "${OS}" == "manjaro" ]; then
+    if command -v lsb_release >/dev/null 2>&1; then
+        OS_VER=`lsb_release -a | awk '/^Release:/{print $2}' | cut -d '.' -f 1-2`
+    else
+        echo "-- ERROR: Manjaro detected, but can't figure out which version. Aborting"
+        debug_vars
+        exit 1
+    fi
+else
+    OS_VER=`awk -F= '/^VERSION_ID=/{print $2}' /etc/os-release | cut -d "\"" -f 2`
+fi
+OS_VER_MAJOR=`echo ${OS_VER} | awk -F. '{print $1}'`
+
+if command -v upower >/dev/null 2>&1; then
+    echo
+    echo "---------------------------------------------------------------------------"
+    upower --version
+    echo "---------------------------------------------------------------------------"
+    echo
+    UPOWER_ORIG_VER=`upower --version`
+else
+    echo "-- ERROR: upower is not installed; nothing to do."
+    debug_vars
+    exit 1
+fi
 echo -e "OS detected:\n--- OS = ${OS}\n--- OS_VER = ${OS_VER}\n\n"
 set_upower_branch $OS $OS_VER
 
@@ -87,16 +106,20 @@ fi
 
 # additional packages required depending on build system (cmake / meson)
 if [ "${BUILD_SYSTEM}" == "meson" ]; then
-    ADDT_PACKAGES="meson ninja-build libimobiledevice-dev libgirepository1.0-dev"
+    if [ "${OS}" == "manjaro" ]; then
+        ADDT_PACKAGES="meson ninja libimobiledevice libgirepository"
+    else
+        ADDT_PACKAGES="meson ninja-build libimobiledevice-dev libgirepository1.0-dev"
+    fi
 elif [ "${BUILD_SYSTEM}" == "cmake" ]; then
     ADDT_PACKAGES="autoconf automake make"
 else
-    echo "Invalid build system"
-    debug_vars
+    echo "ERROR: Invalid build system"
+    unknown_system
     exit 1
 fi
 
-# distro-specific packages
+# distro-specific packages required to compile upower
 if [ "$OS" == "ubuntu" ]; then
     if [ "${BUILD_SYSTEM}" == "meson" ]; then
         ADDT_PACKAGES="meson ninja-build libimobiledevice-dev libgirepository1.0-dev"
@@ -124,15 +147,17 @@ echo "--------------------------------------------------------------------------
 echo
 
 # Download upowerd source and select the proper branch
-git clone https://gitlab.freedesktop.org/upower/upower
+REPO_DIR=$(realpath $(dirname "$0"))
+TEMP_DIR=$(mktemp -d)
+cd ${TEMP_DIR}
+git clone https://gitlab.freedesktop.org/upower/upower ${TEMP_DIR}
 echo "-- Using branch ${BRANCH}"
-cd upower
 git fetch --all --tags
 git checkout tags/${BRANCH} -b ${BRANCH}
-cd src
 
 # Download and patch upowerd
-cp ../../${PATCH} .
+cd src
+cp ${REPO_DIR}/${PATCH} .
 if [ "$1" == "-keyboard" ] || [ "$1" == "--keyboard" ]; then
     SILENCE_KEYBOARD="+     if ((type == UP_DEVICE_KIND_MOUSE || type == UP_DEVICE_KIND_KEYBOARD) && state == UP_DEVICE_STATE_DISCHARGING) {"
     sed -i "/UP_DEVICE_KIND_MOUSE/c${SILENCE_KEYBOARD}" ${PATCH}
@@ -148,15 +173,14 @@ if [ "${BUILD_SYSTEM}" == "cmake" ]; then
 elif [ "${BUILD_SYSTEM}" == "meson" ]; then
     meson _build -Dintrospection=enabled -Dman=true -Dgtk-doc=true -Didevice=enabled
     ninja -C _build
-else
-    echo "Invalid build system"
+else # should never happen; tested above for a valid build system
+    echo "ERROR: Invalid build system"
     unknown_system
     exit 1
 fi
 
 # Install upowerd
 CUR_DATETIME=`date +%Y-%m-%d-%H%M%S`
-pushd . # we're in ./silent-mouse/upower/
 if [ "${BUILD_SYSTEM}" == "meson" ]; then
     cd _build/src
 else # cmake
@@ -169,10 +193,9 @@ sudo mv upowerd ${PATH_UPOWERD}/upowerd-silent
 cd ${PATH_UPOWERD}
 sudo mv upowerd upowerd-original-${CUR_DATETIME}
 sudo ln -s upowerd-silent upowerd
-popd
 
 # Install upower
-pushd .
+cd ${TEMP_DIR}
 if [ "${BUILD_SYSTEM}" == "meson" ]; then
     cd _build/tools
 else # cmake
@@ -185,18 +208,17 @@ sudo mv upower ${PATH_UPOWER}/upower-silent
 cd ${PATH_UPOWER}
 sudo mv upower upower-original-${CUR_DATETIME}
 sudo ln -s upower-silent upower
-popd
 
 # Restart upowerd
 sudo systemctl restart upower
+rm -rf ${TEMP_DIR}
 
 # Compare versions before/after (they will likely be different, but it depends on distro defaults)
-echo
 echo "---------------------------------------------------------------------------"
-echo "upower version BEFORE the update:"
+echo "-- Patch successfully completed! upower version BEFORE the update:"
 echo "${UPOWER_ORIG_VER}"
-echo "-------------------------------------"
-echo "upower version AFTER the update (likely same version, or a minor number above/below):"
+echo
+echo "upower version AFTER the update (is should be the same version, or a minor number above/below):"
 upower --version
-echo "-------------------------------------"
+echo "---------------------------------------------------------------------------"
 
