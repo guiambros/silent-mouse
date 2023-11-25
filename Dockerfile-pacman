@@ -1,0 +1,12 @@
+ARG DISTRO_VERSION=manjarolinux/base:latest
+
+# dependenciesfor pacman-based distros
+FROM ${DISTRO_VERSION}
+COPY docker-entrypoint.sh /
+RUN chmod a+x /docker-entrypoint.sh
+RUN pacman -Syu --noconfirm \
+    tzdata ca-certificates systemd dbus \
+    upower bash git sudo lsb-release patch
+#systemd-sysv dbus-user-session
+ADD . /repo
+ENTRYPOINT ["/docker-entrypoint.sh"]

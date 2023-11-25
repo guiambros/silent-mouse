@@ -1,0 +1,14 @@
+ARG DISTRO_VERSION=ubuntu:latest
+
+# dependenciesfor apt-based distros
+FROM ${DISTRO_VERSION}
+RUN apt-get update && \
+  DEBIAN_FRONTEND=noninteractive \
+  apt-get install -y --no-install-recommends \
+  tzdata ca-certificates systemd systemd-sysv dbus \
+  dbus-user-session upower bash git sudo lsb-release
+
+COPY docker-entrypoint.sh /
+RUN chmod a+x /docker-entrypoint.sh
+ADD . /repo
+ENTRYPOINT ["/docker-entrypoint.sh"]
