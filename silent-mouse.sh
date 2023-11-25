@@ -211,7 +211,7 @@ sudo ln -s upower-silent upower
 
 # Restart upowerd
 sudo systemctl restart upower
-rm -rf ${TEMP_DIR}
+#rm -rf ${TEMP_DIR}
 
 # Compare versions before/after (they will likely be different, but it depends on distro defaults)
 echo "---------------------------------------------------------------------------"
