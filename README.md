@@ -27,7 +27,7 @@ This script was tested with the following distributions and versions:
 
 | Distribution | Versions tested                           |
 | ------------ | ----------------------------------------- |
-| Ubuntu       | 16.05, 18.04, 20.04, 22.04, 23.10         |
+| Ubuntu       | 16.04, 18.04, 20.04, 22.04, 23.10         |
 | Debian       | 10 (buster), 11 (bullseye), 12 (bookworm) |
 | Manjaro      | manjaro 23.1                              |
 
