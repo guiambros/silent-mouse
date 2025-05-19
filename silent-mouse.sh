@@ -29,11 +29,12 @@ tested_versions["debian_10"]="BRANCH='UPOWER_0_99_10' PATCH=${PATCH_LEGACY} PATH
 tested_versions["debian_11"]="BRANCH='UPOWER_0_99_11' PATCH=${PATCH_AFTER_v13}"
 tested_versions["debian_12"]="BRANCH='v0.99.20' PATCH=${PATCH_AFTER_v13} BUILD_SYSTEM='meson'"
 tested_versions["manjaro_23.1"]="BRANCH='v1.90.2' PATCH=${PATCH_AFTER_v13} PATH_UPOWERD='/usr/lib' BUILD_SYSTEM='meson'"
+tested_versions["pop_22.04"]="BRANCH='v0.99.17' PATCH=${PATCH_AFTER_v13} PATH_UPOWERD='/usr/libexec' BUILD_SYSTEM='meson'"
 
 set_upower_branch() {
     local key="${1}_${2}"
     local values=${tested_versions[$key]}
-    
+
     # check for exact os/os_version match
     if [[ -n ${tested_versions[$key]} ]]; then
         eval "${tested_versions[$key]}"
@@ -137,6 +138,11 @@ elif [ "$OS" == "manjaro" ]; then
     echo -e "-- Manjaro detected; installing required libraries\n\n"
     sudo pacman -Syu --noconfirm base-devel gtk-doc gobject-introspection \
         git libtool ${ADDT_PACKAGES}
+
+elif [ "$OS" == "pop" ]; then
+    echo -e "-- POP!_Os detected; installing required libraries\n\n"
+    sudo apt install -y git gtk-doc-tools gobject-introspection libgudev-1.0-dev \
+    libusb-1.0-0-dev autoconf libtool autopoint intltool ${ADDT_PACKAGES}
 
 else
     unknown_system
