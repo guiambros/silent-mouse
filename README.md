@@ -9,7 +9,7 @@ This script will walk you through the steps to download, patch and recompile `up
 
 The script detects the Linux distribution and attempts to download `upower` source code, injects a few lines of code to supress these battery alerts, and then compiles everything and puts the new binaries in the correct locations.
 
-The original binaries are preserved, in cade you want to restore the system to its original state.
+The original binaries are preserved, in case you want to restore the system to its original state.
 
 
 ## Is it safe?
